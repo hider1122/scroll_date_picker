@@ -14,6 +14,7 @@ class DateScrollView extends StatelessWidget {
     required this.locale,
     this.isYearScrollView = false,
     this.isMonthScrollView = false,
+    required this.type,
   }) : super(key: key);
 
   /// A controller for scroll views whose items have the same size.
@@ -24,6 +25,9 @@ class DateScrollView extends StatelessWidget {
 
   /// This is a list of dates.
   final List dates;
+
+  /// This enum for month
+  final MonthType type;
 
   /// A set that allows you to specify options related to ListWheelScrollView.
   final DatePickerOptions options;
@@ -43,7 +47,7 @@ class DateScrollView extends StatelessWidget {
 
   double _getScrollViewWidth(BuildContext context) {
     String _longestText = '';
-    List _dates = isMonthScrollView ? locale.months : dates;
+    List _dates = isMonthScrollView ? getMonths(type) : dates;
     for (var text in _dates) {
       if ('$text'.length > _longestText.length) {
         _longestText = '$text'.padLeft(2, '0');
@@ -66,10 +70,14 @@ class DateScrollView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (context, constraints) {
+      builder: (
+        context,
+        constraints,
+      ) {
         int _maximumCount = constraints.maxHeight ~/ options.itemExtent;
         return Container(
           margin: scrollViewOptions.margin,
+          decoration: scrollViewOptions.decoration,
           width: _getScrollViewWidth(context),
           child: ListWheelScrollView.useDelegate(
             itemExtent: options.itemExtent,
