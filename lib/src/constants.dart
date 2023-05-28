@@ -12,34 +12,55 @@ const String es = 'es';
 const String nl = 'nl';
 const String zh = 'zh';
 const String ar = 'ar';
+const String islamic_ar = "islamic_ar";
+const String islamic_en = "islamic_en";
 
-extension LocaleExtension on Locale {
-  List<String> get months {
-    switch (languageCode) {
-      case zh:
-      case ko:
-        return intMonths;
-      case fr:
-        return frMonths;
-      case de:
-        return deMonths;
-      case vi:
-        return viMonths;
-      case id:
-        return idMonths;
-      case it:
-        return itMonths;
-      case th:
-        return thMonths;
-      case es:
-        return esMonth;
-      case nl:
-        return nlMonth;
-      case ar:
-        return arMonths;
-      default:
-        return enMonths;
-    }
+enum MonthType {
+  ko,
+  fr,
+  de,
+  vi,
+  en,
+  id,
+  it,
+  th,
+  es,
+  nl,
+  zh,
+  ar,
+  islamic_ar,
+  islamic_en
+}
+
+List<String> getMonths(MonthType monthType) {
+  switch (monthType) {
+    case MonthType.zh:
+    case MonthType.ko:
+      return intMonths;
+    case MonthType.fr:
+      return frMonths;
+    case MonthType.de:
+      return deMonths;
+    case MonthType.vi:
+      return viMonths;
+    case MonthType.id:
+      return idMonths;
+    case MonthType.it:
+      return itMonths;
+    case MonthType.th:
+      return thMonths;
+    case MonthType.es:
+      return esMonth;
+    case MonthType.nl:
+      return nlMonth;
+    case MonthType.ar:
+      return arMonths;
+    case MonthType.islamic_en:
+      return arHijriMonts;
+    case MonthType.islamic_ar:
+      return enHijriMonts;
+    default:
+      return enMonths;
   }
 }
 
@@ -196,4 +217,32 @@ const List<String> arMonths = [
   'أكتوبر',
   'نوفمبر',
   'ديسمبر',
+];
+const List<String> arHijriMonts = [
+  'Muharram',
+  'Safar',
+  'Rabi\' Al-Awwal',
+  'Rabi\' Al-Thani',
+  'Jumada Al-Awwal',
+  'Jumada Al-Thani',
+  'Rajab',
+  'Sha\'aban',
+  'Ramadan',
+  'Shawwal',
+  'Dhu Al-Qi\'dah',
+  'Dhu Al-Hijjah'
+];
+const List<String> enHijriMonts = [
+  'محرم',
+  'صفر',
+  'ربيع الاول',
+  'ربيع الثاني',
+  'جمادى الأول',
+  'جمادى الثاني',
+  'رجب',
+  'شعبان',
+  'رمضان',
+  'شوال',
+  'ذو القعدة',
+  'ذو الحجة'
 ];
