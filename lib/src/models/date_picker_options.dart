@@ -1,3 +1,6 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 
 class DatePickerOptions {
@@ -7,6 +10,8 @@ class DatePickerOptions {
     this.perspective = 0.01,
     this.isLoop = true,
     this.backgroundColor = Colors.white,
+    this.backgroundOpacity = 0.15,
+    this.borderRadius,
   });
 
   /// Size of each child in the main axis
@@ -23,4 +28,10 @@ class DatePickerOptions {
 
   /// The color to paint behind the date picker
   final Color backgroundColor;
+
+  /// The opacity behind the date picker
+  final double backgroundOpacity;
+
+  /// The borderRadius behind the date picker
+  final BorderRadiusGeometry? borderRadius;
 }
