@@ -3,6 +3,7 @@ import 'package:scroll_date_picker/scroll_date_picker.dart';
 import 'package:scroll_date_picker/src/widgets/date_scroll_view.dart';
 
 import 'utils/get_monthly_date.dart';
+import 'package:syncfusion_flutter_core/core.dart';
 
 class ScrollDatePicker extends StatefulWidget {
   ScrollDatePicker({
@@ -15,8 +16,10 @@ class ScrollDatePicker extends StatefulWidget {
     DatePickerOptions? options,
     DatePickerScrollViewOptions? scrollViewOptions,
     this.indicator,
+    MonthType? type,
   })  : minimumDate = minimumDate ?? DateTime(1960, 1, 1),
         maximumDate = maximumDate ?? DateTime.now(),
+        type = type ?? MonthType.en,
         locale = locale ?? const Locale('en'),
         options = options ?? const DatePickerOptions(),
         scrollViewOptions =
@@ -40,6 +43,9 @@ class ScrollDatePicker extends StatefulWidget {
 
   /// Set calendar language
   final Locale locale;
+
+  ///  Set calendar month type
+  final MonthType type;
 
   /// A set that allows you to specify options related to ScrollView.
   final DatePickerScrollViewOptions scrollViewOptions;
@@ -100,7 +106,13 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
 
     _years = [
       for (int i = widget.minimumDate.year; i <= widget.maximumDate.year; i++) i
-    ];
+    ]
+        .map((e) => widget.type == MonthType.islamic_ar ||
+                widget.type == MonthType.islamic_en
+            ? HijriDateTime.fromDateTime(DateTime(e)).year
+            : e)
+        .toList();
+
     _initMonths();
     _initDays();
     _yearController =
@@ -138,31 +150,34 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
 
   void _initDateScrollView() {
     _yearScrollView = DateScrollView(
-        dates: _years,
-        controller: _yearController,
-        options: widget.options,
-        scrollViewOptions: widget.scrollViewOptions.year,
-        selectedIndex: selectedYearIndex,
-        isYearScrollView: true,
-        locale: widget.locale,
-        onChanged: (_) {
-          _onDateTimeChanged();
-          _initMonths();
-          _initDays();
-          if (isYearScrollable) {
-            _monthController.jumpToItem(selectedMonthIndex);
-            _dayController.jumpToItem(selectedDayIndex);
-          }
-          isYearScrollable = true;
-        });
+      dates: _years,
+      controller: _yearController,
+      options: widget.options,
+      scrollViewOptions: widget.scrollViewOptions.year,
+      selectedIndex: selectedYearIndex,
+      isYearScrollView: true,
+      locale: widget.locale,
+      onChanged: (_) {
+        _onDateTimeChanged();
+        _initMonths();
+        _initDays();
+        if (isYearScrollable) {
+          _monthController.jumpToItem(selectedMonthIndex);
+          _dayController.jumpToItem(selectedDayIndex);
+        }
+        isYearScrollable = true;
+      },
+      type: widget.type,
+    );
     _monthScrollView = DateScrollView(
-      dates: widget.locale.months.sublist(_months.first - 1, _months.last),
+      dates: getMonths(widget.type).sublist(_months.first - 1, _months.last),
       controller: _monthController,
       options: widget.options,
       scrollViewOptions: widget.scrollViewOptions.month,
       selectedIndex: selectedMonthIndex,
       locale: widget.locale,
       isMonthScrollView: true,
+      type: widget.type,
       onChanged: (_) {
         _onDateTimeChanged();
         _initDays();
@@ -172,6 +187,7 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
         isMonthScrollable = true;
       },
     );
+
     _dayScrollView = DateScrollView(
       dates: _days,
       controller: _dayController,
@@ -179,6 +195,7 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
       scrollViewOptions: widget.scrollViewOptions.day,
       selectedIndex: selectedDayIndex,
       locale: widget.locale,
+      type: widget.type,
       onChanged: (_) {
         _onDateTimeChanged();
         _initDays();
@@ -229,17 +246,20 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
 
   List<Widget> _getScrollDatePicker() {
     _initDateScrollView();
-    switch (widget.locale.languageCode) {
-      case zh:
-      case ko:
+    switch (widget.type) {
+      case MonthType.zh:
+      case MonthType.ko:
         return [_yearScrollView, _monthScrollView, _dayScrollView];
-      case vi:
-      case id:
-      case th:
-      case de:
-      case es:
-      case nl:
-      case fr:
+      case MonthType.vi:
+      case MonthType.id:
+      case MonthType.th:
+      case MonthType.de:
+      case MonthType.es:
+      case MonthType.nl:
+      case MonthType.fr:
+        return [_dayScrollView, _monthScrollView, _yearScrollView];
+      case MonthType.islamic_ar:
+      case MonthType.islamic_en:
         return [_dayScrollView, _monthScrollView, _yearScrollView];
       default:
         return [_monthScrollView, _dayScrollView, _yearScrollView];
@@ -264,12 +284,14 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
+                    borderRadius: widget.options.borderRadius,
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
                         widget.options.backgroundColor,
-                        widget.options.backgroundColor.withOpacity(0.7),
+                        widget.options.backgroundColor
+                            .withOpacity(widget.options.backgroundOpacity),
                       ],
                     ),
                   ),
@@ -286,11 +308,13 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
+                    borderRadius: widget.options.borderRadius,
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        widget.options.backgroundColor.withOpacity(0.7),
+                        widget.options.backgroundColor
+                            .withOpacity(widget.options.backgroundOpacity),
                         widget.options.backgroundColor,
                       ],
                     ),
