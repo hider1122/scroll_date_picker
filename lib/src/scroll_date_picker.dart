@@ -99,11 +99,7 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
   @override
   void initState() {
     super.initState();
-    _selectedDate = widget.selectedDate.isAfter(widget.maximumDate) ||
-            widget.selectedDate.isBefore(widget.minimumDate)
-        ? DateTime.now()
-        : widget.selectedDate;
-
+    _selectedDate = widget.selectedDate;
     _years = [
       for (int i = widget.minimumDate.year; i <= widget.maximumDate.year; i++) i
     ]
@@ -115,11 +111,29 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
 
     _initMonths();
     _initDays();
-    _yearController =
-        FixedExtentScrollController(initialItem: selectedYearIndex);
-    _monthController =
-        FixedExtentScrollController(initialItem: selectedMonthIndex);
-    _dayController = FixedExtentScrollController(initialItem: selectedDayIndex);
+    _yearController = FixedExtentScrollController(initialItem: 0);
+    _monthController = FixedExtentScrollController(initialItem: 0);
+    _dayController = FixedExtentScrollController(initialItem: 0);
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (widget.type == MonthType.islamic_ar ||
+          widget.type == MonthType.islamic_en) {
+        _selectedDate = widget.selectedDate.isAfter(widget.maximumDate) ||
+                widget.selectedDate.isBefore(widget.minimumDate)
+            ? HijriDateTime.fromDateTime(DateTime.now()).toDateTime()
+            : widget.selectedDate;
+      }
+
+      _selectedDate = widget.selectedDate;
+      isYearScrollable = false;
+      isMonthScrollable = false;
+      _yearController.animateToItem(selectedYearIndex,
+          curve: Curves.ease, duration: const Duration(microseconds: 500));
+      _monthController.animateToItem(selectedMonthIndex,
+          curve: Curves.ease, duration: const Duration(microseconds: 500));
+      _dayController.animateToItem(selectedDayIndex,
+          curve: Curves.ease, duration: const Duration(microseconds: 500));
+    });
   }
 
   @override
@@ -240,7 +254,9 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
   }
 
   void _onDateTimeChanged() {
-    _selectedDate = DateTime(selectedYear, selectedMonth, selectedDay);
+    setState(() {
+      _selectedDate = DateTime(selectedYear, selectedMonth, selectedDay);
+    });
     widget.onDateTimeChanged(_selectedDate);
   }
 
